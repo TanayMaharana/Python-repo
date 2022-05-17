@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 import psutil
 import shutil
+import os
+import sys
+
+def check_reboot():
+  return os.path.exists("/run/reboot-required")
 
 def check_disk_usage(disk):
   du = shutil.disk_usage(disk)
@@ -11,7 +16,14 @@ def check_cpu_usage():
   usage = psutil.cpu_percent(1)
   return usage < 75
 
-if not check_disk_usage("/") and check_cpu_usage():
-  print("ERROR in the system!")
-else:
-  print("Everything is working fine")
+def main():
+  if not check_disk_usage("/") and check_cpu_usage():
+    print("ERROR in the system!")
+    sys.exit(2)
+  if check_reboot():
+    print("Reboot Required.")
+    sys.exit(1)
+  else:
+    print("Everything is working fine.")
+
+main()
